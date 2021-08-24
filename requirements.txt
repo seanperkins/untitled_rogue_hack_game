@@ -1,5 +1,16 @@
+astroid==2.7.2
+autopep8==1.5.7
 cffi==1.14.6
+isort==5.9.3
+lazy-object-proxy==1.6.0
+mccabe==0.6.1
 numpy==1.21.2
+pep8==1.7.1
+platformdirs==2.2.0
+pycodestyle==2.7.0
 pycparser==2.20
+pylint==2.10.2
 tcod==12.7.3
+toml==0.10.2
 typing-extensions==3.10.0.0
+wrapt==1.12.1
