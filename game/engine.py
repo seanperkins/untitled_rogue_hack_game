@@ -44,7 +44,10 @@ class Engine:
         self.game_map.explored |= self.game_map.visible
 
     def render(self, console: Console) -> None:
+        # Render frame with map inside
         self.game_map.render(console)
+
+        # Render sidebar
 
         self.message_log.render(console=console, x=21,
                                 y=45, width=40, height=5)

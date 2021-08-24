@@ -15,6 +15,8 @@ import game.entity_factories as entity_factories
 from game.game_map import GameWorld
 import game.input_handlers as input_handlers
 
+import game.game_config as cfg
+
 
 # Load the background image and remove the alpha channel.
 background_image = tcod.image.load("data/menu_background.png")[:, :, :3]
@@ -22,10 +24,10 @@ background_image = tcod.image.load("data/menu_background.png")[:, :, :3]
 
 def new_game() -> Engine:
     """Return a brand new game session as an Engine instance."""
-    map_width = 80
-    map_height = 43
+    map_width = cfg.MAP_WIDTH
+    map_height = cfg.MAP_HEIGHT
 
-    room_max_size = 10
+    room_max_size = 20
     room_min_size = 6
     max_rooms = 30
 

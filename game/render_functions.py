@@ -59,3 +59,8 @@ def render_names_at_mouse_location(
     )
 
     console.print(x=x, y=y, string=names_at_mouse_location)
+
+
+def render_frame(console: Console, label: str, x: int, y: int, width: int, height: int) -> None:
+    console.draw_frame(x, y, width, height, fg=color.green)
+    console.print(x=x + 1, y=y, string=label, fg=color.green)

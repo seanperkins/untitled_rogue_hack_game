@@ -1,4 +1,5 @@
 from __future__ import annotations
+from game.render_functions import render_frame
 
 from typing import Iterable, Iterator, Optional, TYPE_CHECKING
 
@@ -19,16 +20,16 @@ class GameMap:
         self, engine: Engine, width: int, height: int, entities: Iterable[Entity] = ()
     ):
         self.engine = engine
-        self.width, self.height = width, height
+        self.width, self.height = width-2, height-2
         self.entities = set(entities)
         self.tiles = np.full(
-            (width, height), fill_value=tile_types.wall, order="F")
+            (self.width, self.height), fill_value=tile_types.wall, order="F")
 
         self.visible = np.full(
-            (width, height), fill_value=False, order="F"
+            (self.width, self.height), fill_value=False, order="F"
         )  # Tiles the player can currently see
         self.explored = np.full(
-            (width, height), fill_value=False, order="F"
+            (self.width, self.height), fill_value=False, order="F"
         )  # Tiles the player has seen before
 
         self.downstairs_location = (0, 0)
@@ -82,7 +83,9 @@ class GameMap:
         If it isn't, but it's in the "explored" array, then draw it with the "dark" colors.
         Otherwise, the default is "SHROUD".
         """
-        console.tiles_rgb[0: self.width, 0: self.height] = np.select(
+        render_frame(console, 'GUI', 0, 0, self.width + 2, self.height + 2)
+
+        console.tiles_rgb[1: self.width + 1, 1: self.height + 1] = np.select(
             condlist=[self.visible, self.explored],
             choicelist=[self.tiles["light"], self.tiles["dark"]],
             default=tile_types.SHROUD,

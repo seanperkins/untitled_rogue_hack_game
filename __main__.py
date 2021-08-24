@@ -8,6 +8,8 @@ import game.exceptions as exceptions
 import game.setup_game as setup_game
 import game.input_handlers as input_handlers
 
+import game.game_config as cfg
+
 
 def save_game(handler: input_handlers.BaseEventHandler, filename: str) -> None:
     """If the current event handler has an active Engine then save it."""
@@ -17,20 +19,21 @@ def save_game(handler: input_handlers.BaseEventHandler, filename: str) -> None:
 
 
 def main() -> None:
-    screen_width = 120
-    screen_height = 60
+    screen_height = cfg.SCREEN_HEIGHT
+    screen_width = cfg.SCREEN_WIDTH
 
-    tileset = tcod.tileset.load_tilesheet(
-        "data/cp437_12x12.png", 16, 16, tcod.tileset.CHARMAP_CP437
-    )
+    tileset = tcod.tileset.load_tilesheet(*cfg.TILESET)
 
-    handler: input_handlers.BaseEventHandler = setup_game.MainMenu()
+    # handler: input_handlers.BaseEventHandler = setup_game.MainMenu()
+    # Start new game, don't waste time with menu.
+    handler: input_handlers.BaseEventHandler = input_handlers.MainGameEventHandler(
+        setup_game.new_game())
 
-    with tcod.context.new_terminal(
-        screen_width,
-        screen_height,
+    with tcod.context.new(
+        columns=screen_width,
+        rows=screen_height,
         tileset=tileset,
-        title="Untitled Hacking Game",
+        title=cfg.TITLE,
         vsync=True,
     ) as context:
         root_console = tcod.Console(screen_width, screen_height, order="F")
