@@ -7,6 +7,7 @@ from tcod.console import Console
 
 from game.entity import Actor, Item
 import game.tile_types as tile_types
+import game.color as color
 
 if TYPE_CHECKING:
     from game.engine import Engine

@@ -17,11 +17,11 @@ def save_game(handler: input_handlers.BaseEventHandler, filename: str) -> None:
 
 
 def main() -> None:
-    screen_width = 100
+    screen_width = 120
     screen_height = 60
 
     tileset = tcod.tileset.load_tilesheet(
-        "data/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
+        "data/cp437_12x12.png", 16, 16, tcod.tileset.CHARMAP_CP437
     )
 
     handler: input_handlers.BaseEventHandler = setup_game.MainMenu()
