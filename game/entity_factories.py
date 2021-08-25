@@ -5,7 +5,7 @@ from components.fighter import Fighter
 from components.inventory import Inventory
 from components.level import Level
 from game.entity import Actor, Item
-
+import game.color as color
 
 player = Actor(
     char="@",
@@ -20,7 +20,7 @@ player = Actor(
 
 orc = Actor(
     char="o",
-    color=(63, 127, 63),
+    color=color.light_red,
     name="Orc",
     ai_cls=HostileEnemy,
     equipment=Equipment(),
@@ -30,7 +30,7 @@ orc = Actor(
 )
 troll = Actor(
     char="T",
-    color=(0, 127, 0),
+    color=color.dark_red,
     name="Troll",
     ai_cls=HostileEnemy,
     equipment=Equipment(),

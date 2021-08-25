@@ -25,14 +25,14 @@ def get_names_at_location(x: int, y: int, game_map: GameMap) -> str:
 def render_bar(
         console: Console, x, y, width, height, current_value: int, maximum_value: int, total_width: int,
         *args, **kwargs) -> None:
-    bar_width = int(float(current_value) / maximum_value * total_width)
+    bar_width = int(float(current_value) / maximum_value * width)
 
     console.draw_rect(x=x, y=y, width=width, height=1,
                       ch=1, bg=color.bar_empty)
 
     if bar_width > 0:
         console.draw_rect(
-            x=x, y=y, width=width, height=1, ch=1, bg=color.bar_filled
+            x=x, y=y, width=bar_width, height=1, ch=1, bg=color.bar_filled
         )
 
     console.print(
