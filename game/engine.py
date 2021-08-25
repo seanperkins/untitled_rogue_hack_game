@@ -1,4 +1,5 @@
 from __future__ import annotations
+from game.game_config import ACTIONS_HEIGHT, ACTIONS_WIDTH, LOG_HEIGHT, LOG_WIDTH, MAP_HEIGHT, MAP_WIDTH, SIDEBAR_COMPONENT_HEIGHT, SIDEBAR_WIDTH
 
 import lzma
 import pickle
@@ -45,28 +46,78 @@ class Engine:
 
     def render(self, console: Console) -> None:
         # Render frame with map inside
-        self.game_map.render(console)
-
-        # Render sidebar
-
-        self.message_log.render(console=console, x=21,
-                                y=45, width=40, height=5)
-
-        render_functions.render_bar(
+        render_functions.render_widget(
             console=console,
+            widget='GUI',
+            x=0,
+            y=0,
+            width=MAP_WIDTH,
+            height=MAP_HEIGHT,
+            render_function=self.game_map.render,
+        )
+        # Render sidebar
+        render_functions.render_widget(
+            console=console,
+            widget='DIAGNOSTIC',
+            x=MAP_WIDTH,
+            y=0,
+            width=SIDEBAR_WIDTH,
+            height=SIDEBAR_COMPONENT_HEIGHT,
+            render_function=render_functions.render_bar,
             current_value=self.player.fighter.hp,
             maximum_value=self.player.fighter.max_hp,
             total_width=20,
         )
 
-        render_functions.render_dungeon_level(
+        render_functions.render_widget(
             console=console,
-            dungeon_level=self.game_world.current_floor,
-            location=(0, 47),
+            widget='CONTEXT',
+            x=MAP_WIDTH,
+            y=SIDEBAR_COMPONENT_HEIGHT,
+            width=SIDEBAR_WIDTH,
+            height=SIDEBAR_COMPONENT_HEIGHT,
+            render_function=render_functions.render_names_at_mouse_location,
+            engine=self,
         )
 
-        render_functions.render_names_at_mouse_location(
-            console=console, x=21, y=44, engine=self
+        render_functions.render_widget(
+            console=console,
+            widget='SPAWNED DAEMONS',
+            x=MAP_WIDTH,
+            y=SIDEBAR_COMPONENT_HEIGHT * 2,
+            width=SIDEBAR_WIDTH,
+            height=SIDEBAR_COMPONENT_HEIGHT,
+            render_function=None,
+        )
+
+        render_functions.render_widget(
+            console=console,
+            widget='OBJECTIVES',
+            x=MAP_WIDTH,
+            y=SIDEBAR_COMPONENT_HEIGHT * 3,
+            width=SIDEBAR_WIDTH,
+            height=SIDEBAR_COMPONENT_HEIGHT,
+            render_function=None,
+        )
+
+        render_functions.render_widget(
+            console=console,
+            widget='ACTION STACK',
+            x=0,
+            y=MAP_HEIGHT,
+            width=ACTIONS_WIDTH,
+            height=ACTIONS_HEIGHT,
+            render_function=None,
+        )
+
+        render_functions.render_widget(
+            console=console,
+            widget='LOG',
+            x=0,
+            y=MAP_HEIGHT+ACTIONS_HEIGHT,
+            width=LOG_WIDTH,
+            height=LOG_HEIGHT,
+            render_function=self.message_log.render,
         )
 
     def save_as(self, filename: str) -> None:

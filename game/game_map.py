@@ -20,7 +20,7 @@ class GameMap:
         self, engine: Engine, width: int, height: int, entities: Iterable[Entity] = ()
     ):
         self.engine = engine
-        self.width, self.height = width-2, height-2
+        self.width, self.height = width, height
         self.entities = set(entities)
         self.tiles = np.full(
             (self.width, self.height), fill_value=tile_types.wall, order="F")
@@ -75,7 +75,7 @@ class GameMap:
         """Return True if x and y are inside of the bounds of this map."""
         return 0 <= x < self.width and 0 <= y < self.height
 
-    def render(self, console: Console) -> None:
+    def render(self, console: Console, x: int, y: int, height: int, width: int) -> None:
         """
         Renders the map.
 
@@ -83,16 +83,22 @@ class GameMap:
         If it isn't, but it's in the "explored" array, then draw it with the "dark" colors.
         Otherwise, the default is "SHROUD".
         """
-        render_frame(console, 'GUI', 0, 0, self.width + 2, self.height + 2)
-
-        console.tiles_rgb[1: self.width + 1, 1: self.height + 1] = np.select(
+        tiles_in_frame = np.select(
             condlist=[self.visible, self.explored],
             choicelist=[self.tiles["light"], self.tiles["dark"]],
             default=tile_types.SHROUD,
         )
+        tiles_in_frame = np.delete(tiles_in_frame, [x, width-x], 0)
+        tiles_in_frame = np.delete(tiles_in_frame, [y, height-y], 1)
+
+        # Remember that tiles is the raw 2d tiles array
+        console.tiles_rgb[x: width+x, x: height+y] = tiles_in_frame
+
+        entities_in_frame = [entity for entity in self.entities if entity.x >=
+                             x and entity.y >= y and entity.x < x + width and entity.y < y + height]
 
         entities_sorted_for_rendering = sorted(
-            self.entities, key=lambda x: x.render_order.value
+            entities_in_frame, key=lambda x: x.render_order.value
         )
 
         for entity in entities_sorted_for_rendering:
