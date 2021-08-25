@@ -3,18 +3,18 @@
 ## Creating virtual env and installing packages from requirements
 
 On Linux:
-`$ virtualenv .env && source .env/bin/activate && pip install -r requirements.txt`
+`$ virtualenv .venv && source .venv/bin/activate && pip install -r requirements.txt`
 
 On Windows:
-`PS py -m venv .env && .env\Scripts\activate && py -m pip install -r requirements.txt`
+`PS py -m venv .venv && .venv\Scripts\activate && py -m pip install -r requirements.txt`
 
 ## Using the virtual environment
 
 On Linux:
-`$ source .env/bin/activate`
+`$ source .venv/bin/activate`
 
 On Windows:
-`PS .env\Scripts\activate`
+`PS .venv\Scripts\activate`
 
 ## Running the program
 
