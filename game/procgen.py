@@ -102,6 +102,35 @@ class RectangularRoom:
         """Return the inner area of this room as a 2D array index."""
         return slice(self.x1 + 1, self.x2), slice(self.y1 + 1, self.y2)
 
+    @property
+    def outer(self) -> Tuple[slice, slice]:
+        """Return the outer area of this room as a 2D array index."""
+        return slice(self.x1 - 1, self.x2 + 1), slice(self.y1 - 1, self.y2 + 1)
+
+    def add_opening(self, dungeon_tiles: GameMap.tiles):
+        """Add a 1-tile wide opening to the room."""
+        # Figure out which direction door will be
+        dir = random.randint(0, 3)
+        if dir == 0:
+            # Right door
+            x = self.x2
+            y = self.y1 + (self.y2 - self.y1) // 2
+
+        elif dir == 1:
+            # Bottom door
+            x = self.x1 + (self.x2 - self.x1) // 2
+            y = self.y2
+        elif dir == 2:
+            # Left door
+            x = self.x1
+            y = self.y1 + (self.y2 - self.y1) // 2
+        else:
+            # Top door
+            x = self.x1 + (self.x2 - self.x1) // 2
+            y = self.y1
+
+        dungeon_tiles[x, y] = tile_types.floor
+
     def intersects(self, other: RectangularRoom) -> bool:
         """Return True if this room overlaps with another RectangularRoom."""
         return (
@@ -110,6 +139,11 @@ class RectangularRoom:
             and self.y1 <= other.y2
             and self.y2 >= other.y1
         )
+
+
+class SystemRoom(RectangularRoom):
+    def __init__(self, x: int, y: int, width: int, height: int):
+        super().__init__(x, y, width, height)
 
 
 def place_entities(room: RectangularRoom, dungeon: GameMap, floor_number: int,) -> None:
@@ -182,15 +216,18 @@ def generate_dungeon(
         y = random.randint(0, dungeon.height - room_height - 1)
 
         # "RectangularRoom" class makes rectangles easier to work with
-        new_room = RectangularRoom(x, y, room_width, room_height)
+        new_room = SystemRoom(x, y, room_width, room_height)
 
         # Run through the other rooms and see if they intersect with this one.
         if any(new_room.intersects(other_room) for other_room in rooms):
             continue  # This room intersects, so go to the next attempt.
         # If there are no intersections then the room is valid.
 
-        # Dig out this rooms inner area.
+        # Add walls to the room.
+        dungeon.tiles[new_room.outer] = tile_types.wall
         dungeon.tiles[new_room.inner] = tile_types.floor
+
+        new_room.add_opening(dungeon.tiles)
 
         if len(rooms) == 0:
             # The first room, where the player starts.
