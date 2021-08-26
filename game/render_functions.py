@@ -12,12 +12,16 @@ if TYPE_CHECKING:
 
 
 def get_names_at_location(x: int, y: int, game_map: GameMap) -> str:
-    if not game_map.in_bounds(x, y) or not game_map.visible[x, y]:
+    (adj_x, adj_y) = game_map.camera.to_camera_coordinates(x, y)
+    # If the coordinates are outside the camera, return an empty string.
+    if adj_x is None or adj_y is None:
+        return ''
+    # If the coordinates are inside the camera, but out of bounds for the map or not visible, return an empty string.
+    if not game_map.in_bounds(x, y) or not game_map.visible[adj_x, adj_y]:
         return ""
 
     names = ", ".join(
-        entity.name for entity in game_map.entities if entity.x == x and entity.y == y
-    )
+        entity.name for entity in game_map.entities if entity.x == adj_x and entity.y == adj_y)
 
     return names.capitalize()
 
@@ -55,7 +59,6 @@ def render_names_at_mouse_location(
     console: Console, x: int, y: int, engine: Engine, *args, **kwargs,
 ) -> None:
     mouse_x, mouse_y = engine.mouse_location
-
     names_at_mouse_location = get_names_at_location(
         x=mouse_x, y=mouse_y, game_map=engine.game_map
     )

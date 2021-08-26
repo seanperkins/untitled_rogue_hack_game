@@ -11,12 +11,16 @@ class Camera:
         :param width: Width of the camera.
         :param height: Height of the camera.
         """
-        self.width = width
-        self.height = height
+        self.width = width - 2
+        self.height = height - 2
         self.x = 0
         self.y = 0
         self.map_width = 0
         self.map_height = 0
+
+        # Used to determine how many tiles over the camera is positioned
+        self.screen_offset_x = 0
+        self.screen_offset_y = 0
 
     def center_on(self, x, y):
         """
@@ -66,9 +70,12 @@ class Camera:
         :return: Converted X position.
         :return: Converted Y position.
         """
-        (x, y) = (x - self.x, y - self.y)
+        adjusted_x = self.x - \
+            self.screen_offset_x + x
+        adjusted_y = self.y - \
+            self.screen_offset_y + y
 
         if (x < 0 or y < 0 or x >= self.width or y >= self.height):
             return (None, None)  # if it's outside the view, return nothing
 
-        return (x, y)
+        return (adjusted_x, adjusted_y)

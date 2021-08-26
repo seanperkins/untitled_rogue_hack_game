@@ -1,6 +1,8 @@
 from __future__ import annotations
 from game.camera import Camera
-from game.game_config import ACTIONS_HEIGHT, ACTIONS_WIDTH, LOG_HEIGHT, LOG_WIDTH, MAP_HEIGHT, MAP_WIDTH, SIDEBAR_COMPONENT_HEIGHT, SIDEBAR_WIDTH
+from game.game_config import ACTIONS_HEIGHT, ACTIONS_WIDTH, CAMERA_HEIGHT, \
+    CAMERA_WIDTH, LOG_HEIGHT, LOG_WIDTH, MAP_HEIGHT, MAP_WIDTH, \
+    SIDEBAR_COMPONENT_HEIGHT, SIDEBAR_WIDTH
 
 import lzma
 import pickle
@@ -50,13 +52,13 @@ class Engine:
     def render(self, console: Console) -> None:
         # Render frame with map inside
         render_functions.render_frame(
-            console, 'GUI', 0, 0, MAP_WIDTH, MAP_HEIGHT)
+            console, 'GUI', 0, 0, CAMERA_WIDTH, CAMERA_HEIGHT)
         self.game_map.render(console)
         # Render sidebar
         render_functions.render_widget(
             console=console,
             widget='DIAGNOSTIC',
-            x=MAP_WIDTH,
+            x=CAMERA_WIDTH,
             y=0,
             width=SIDEBAR_WIDTH,
             height=SIDEBAR_COMPONENT_HEIGHT,
@@ -69,7 +71,7 @@ class Engine:
         render_functions.render_widget(
             console=console,
             widget='CONTEXT',
-            x=MAP_WIDTH,
+            x=CAMERA_WIDTH,
             y=SIDEBAR_COMPONENT_HEIGHT,
             width=SIDEBAR_WIDTH,
             height=SIDEBAR_COMPONENT_HEIGHT,
@@ -80,7 +82,7 @@ class Engine:
         render_functions.render_widget(
             console=console,
             widget='SPAWNED DAEMONS',
-            x=MAP_WIDTH,
+            x=CAMERA_WIDTH,
             y=SIDEBAR_COMPONENT_HEIGHT * 2,
             width=SIDEBAR_WIDTH,
             height=SIDEBAR_COMPONENT_HEIGHT,
@@ -90,7 +92,7 @@ class Engine:
         render_functions.render_widget(
             console=console,
             widget='OBJECTIVES',
-            x=MAP_WIDTH,
+            x=CAMERA_WIDTH,
             y=SIDEBAR_COMPONENT_HEIGHT * 3,
             width=SIDEBAR_WIDTH,
             height=SIDEBAR_COMPONENT_HEIGHT,
@@ -101,7 +103,7 @@ class Engine:
             console=console,
             widget='ACTION STACK',
             x=0,
-            y=MAP_HEIGHT,
+            y=CAMERA_HEIGHT,
             width=ACTIONS_WIDTH,
             height=ACTIONS_HEIGHT,
             render_function=None,
@@ -111,7 +113,7 @@ class Engine:
             console=console,
             widget='LOG',
             x=0,
-            y=MAP_HEIGHT+ACTIONS_HEIGHT,
+            y=CAMERA_HEIGHT+ACTIONS_HEIGHT,
             width=LOG_WIDTH,
             height=LOG_HEIGHT,
             render_function=self.message_log.render,

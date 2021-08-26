@@ -94,6 +94,9 @@ class GameMap:
             choicelist=[self.tiles["light"], self.tiles["dark"]],
             default=tile_types.SHROUD,
         )
+        # Come up with the rows and columns off screen that should be removed from the tiles
+        # It seems like there should be an easier or better way to do this.
+        # TODO: Find better way to remove off screen tiles
         rows_to_delete = [n for n in range(
             0, x)] + [n for n in range(x + width, len(tiles_in_frame))]
         columns_to_delete = [n for n in range(
@@ -101,14 +104,14 @@ class GameMap:
 
         tiles_in_frame = np.delete(tiles_in_frame, rows_to_delete, axis=0)
         tiles_in_frame = np.delete(tiles_in_frame, columns_to_delete, axis=1)
-
+        # Creating a new console to blit into the main console later
         new_console = Console(width, height, 'F')
         # Remember that tiles is the raw 2d tiles array
         new_console.tiles_rgb[0: width, 0: height] = tiles_in_frame
-
+        # Grab all the entities that should be visible on the camera frame
         entities_in_frame = [entity for entity in self.entities if entity.x >=
                              x and entity.y >= y and entity.x < x + self.camera.map_width and entity.y < y + self.camera.map_height]
-
+        # Sort entities by their render order so they show up correctly
         entities_sorted_for_rendering = sorted(
             entities_in_frame, key=lambda x: x.render_order.value
         )
@@ -117,7 +120,11 @@ class GameMap:
                 new_console.print(
                     x=entity.x - x, y=entity.y - y, string=entity.char, fg=entity.color
                 )
-        new_console.blit(console, 1, 1, 0, 0, width, height)
+        # Setting the screen offset here which feels a little hacky
+        self.camera.screen_offset_x = 1
+        self.camera.screen_offset_y = 1
+        new_console.blit(console, self.camera.screen_offset_x,
+                         self.camera.screen_offset_y, 0, 0, width, height)
 
 
 class GameWorld:
