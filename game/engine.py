@@ -1,4 +1,5 @@
 from __future__ import annotations
+from game.camera import Camera
 from game.game_config import ACTIONS_HEIGHT, ACTIONS_WIDTH, LOG_HEIGHT, LOG_WIDTH, MAP_HEIGHT, MAP_WIDTH, SIDEBAR_COMPONENT_HEIGHT, SIDEBAR_WIDTH
 
 import lzma
@@ -20,11 +21,13 @@ if TYPE_CHECKING:
 class Engine:
     game_map: GameMap
     game_world: GameWorld
+    camera: Camera
 
-    def __init__(self, player: Actor):
+    def __init__(self, player: Actor, camera: Camera,):
         self.message_log = MessageLog()
         self.mouse_location = (0, 0)
         self.player = player
+        self.camera = camera
 
     def handle_enemy_turns(self) -> None:
         for entity in set(self.game_map.actors) - {self.player}:
@@ -46,15 +49,9 @@ class Engine:
 
     def render(self, console: Console) -> None:
         # Render frame with map inside
-        render_functions.render_widget(
-            console=console,
-            widget='GUI',
-            x=0,
-            y=0,
-            width=MAP_WIDTH,
-            height=MAP_HEIGHT,
-            render_function=self.game_map.render,
-        )
+        render_functions.render_frame(
+            console, 'GUI', 0, 0, MAP_WIDTH, MAP_HEIGHT)
+        self.game_map.render(console)
         # Render sidebar
         render_functions.render_widget(
             console=console,

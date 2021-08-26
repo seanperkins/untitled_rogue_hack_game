@@ -1,4 +1,5 @@
 from __future__ import annotations
+from game.camera import Camera
 
 import random
 from typing import Dict, Iterator, List, Tuple, TYPE_CHECKING
@@ -161,10 +162,13 @@ def generate_dungeon(
     map_width: int,
     map_height: int,
     engine: Engine,
+    camera: Camera,
 ) -> GameMap:
     """Generate a new dungeon map."""
     player = engine.player
-    dungeon = GameMap(engine, map_width, map_height, entities=[player])
+    dungeon = GameMap(engine, map_width, map_height, camera, entities=[player])
+    camera.map_width = map_width
+    camera.map_height = map_height
 
     rooms: List[RectangularRoom] = []
 
@@ -191,6 +195,7 @@ def generate_dungeon(
         if len(rooms) == 0:
             # The first room, where the player starts.
             player.place(*new_room.center, dungeon)
+            camera.center_on(*new_room.center)
         else:  # All rooms after the first.
             # Dig out a tunnel between this room and the previous one.
             for x, y in tunnel_between(rooms[-1].center, new_room.center):

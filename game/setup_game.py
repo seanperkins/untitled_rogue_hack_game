@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+from game.camera import Camera
 import lzma
 import pickle
 import traceback
@@ -32,16 +33,17 @@ def new_game() -> Engine:
     max_rooms = 30
 
     player = copy.deepcopy(entity_factories.player)
-
-    engine = Engine(player=player)
+    camera = Camera(width=cfg.MAP_WIDTH - 2, height=cfg.MAP_HEIGHT - 2)
+    engine = Engine(player=player, camera=camera)
 
     engine.game_world = GameWorld(
         engine=engine,
         max_rooms=max_rooms,
         room_min_size=room_min_size,
         room_max_size=room_max_size,
-        map_width=map_width,
-        map_height=map_height,
+        map_width=map_width*2,
+        map_height=map_height*2,
+        camera=camera,
     )
 
     engine.game_world.generate_floor()

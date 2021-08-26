@@ -1,4 +1,5 @@
 from __future__ import annotations
+from game.camera import Camera
 from game.render_functions import render_frame
 
 from typing import Iterable, Iterator, Optional, TYPE_CHECKING
@@ -17,9 +18,10 @@ if TYPE_CHECKING:
 
 class GameMap:
     def __init__(
-        self, engine: Engine, width: int, height: int, entities: Iterable[Entity] = ()
+        self, engine: Engine, width: int, height: int, camera: Camera, entities: Iterable[Entity] = ()
     ):
         self.engine = engine
+        self.camera = camera
         self.width, self.height = width, height
         self.entities = set(entities)
         self.tiles = np.full(
@@ -75,7 +77,7 @@ class GameMap:
         """Return True if x and y are inside of the bounds of this map."""
         return 0 <= x < self.width and 0 <= y < self.height
 
-    def render(self, console: Console, x: int, y: int, height: int, width: int) -> None:
+    def render(self, console: Console) -> None:
         """
         Renders the map.
 
@@ -83,29 +85,39 @@ class GameMap:
         If it isn't, but it's in the "explored" array, then draw it with the "dark" colors.
         Otherwise, the default is "SHROUD".
         """
+        (x, y) = self.camera.x, self.camera.y
+
+        (height, width) = self.camera.height, self.camera.width
+
         tiles_in_frame = np.select(
             condlist=[self.visible, self.explored],
             choicelist=[self.tiles["light"], self.tiles["dark"]],
             default=tile_types.SHROUD,
         )
-        tiles_in_frame = np.delete(tiles_in_frame, [x, width-x], 0)
-        tiles_in_frame = np.delete(tiles_in_frame, [y, height-y], 1)
+        rows_to_delete = [n for n in range(
+            0, x)] + [n for n in range(x + width, len(tiles_in_frame))]
+        columns_to_delete = [n for n in range(
+            0, y)] + [n for n in range(y + height, len(tiles_in_frame[0]))]
 
+        tiles_in_frame = np.delete(tiles_in_frame, rows_to_delete, axis=0)
+        tiles_in_frame = np.delete(tiles_in_frame, columns_to_delete, axis=1)
+
+        new_console = Console(width, height, 'F')
         # Remember that tiles is the raw 2d tiles array
-        console.tiles_rgb[x: width+x, x: height+y] = tiles_in_frame
+        new_console.tiles_rgb[0: width, 0: height] = tiles_in_frame
 
         entities_in_frame = [entity for entity in self.entities if entity.x >=
-                             x and entity.y >= y and entity.x < x + width and entity.y < y + height]
+                             x and entity.y >= y and entity.x < x + self.camera.map_width and entity.y < y + self.camera.map_height]
 
         entities_sorted_for_rendering = sorted(
             entities_in_frame, key=lambda x: x.render_order.value
         )
-
         for entity in entities_sorted_for_rendering:
             if self.visible[entity.x, entity.y]:
-                console.print(
-                    x=entity.x, y=entity.y, string=entity.char, fg=entity.color
+                new_console.print(
+                    x=entity.x - x, y=entity.y - y, string=entity.char, fg=entity.color
                 )
+        new_console.blit(console, 1, 1, 0, 0, width, height)
 
 
 class GameWorld:
@@ -122,9 +134,11 @@ class GameWorld:
         max_rooms: int,
         room_min_size: int,
         room_max_size: int,
-        current_floor: int = 0
+        camera: Camera,
+        current_floor: int = 0,
     ):
         self.engine = engine
+        self.camera = camera
 
         self.map_width = map_width
         self.map_height = map_height
@@ -148,4 +162,5 @@ class GameWorld:
             map_width=self.map_width,
             map_height=self.map_height,
             engine=self.engine,
+            camera=self.camera,
         )

@@ -183,6 +183,8 @@ class MovementAction(ActionWithDirection):
             raise exceptions.Impossible("That way is blocked.")
 
         self.entity.move(self.dx, self.dy)
+        if self.entity is self.engine.player:
+            self.engine.camera.center_on(dest_x, dest_y)
 
 
 class BumpAction(ActionWithDirection):
