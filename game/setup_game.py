@@ -129,14 +129,13 @@ class MainMenu(input_handlers.BaseEventHandler):
 
     def on_render(self, console_handler: ConsoleHandler) -> None:
         """Render the main menu on a background image."""
-        new_console = Console(120, 72, order='F')
+        new_console = Console(24, 7, order='F')
 
         new_console.print(
-            new_console.width // 2,
-            new_console.height // 2 - 4,
+            1,
+            1,
             "Untitled Hacking Game",
             fg=color.menu_title,
-            alignment=tcod.CENTER,
         )
 
         menu_width = 24
@@ -144,15 +143,14 @@ class MainMenu(input_handlers.BaseEventHandler):
             ["[N] Play a new game", "[C] Continue last game", "[Q] Quit"]
         ):
             new_console.print(
-                new_console.width // 2,
-                new_console.height // 2 - 2 + i,
+                1,
+                3 + i,
                 text.ljust(menu_width),
                 fg=color.menu_text,
-                bg=color.black,
-                alignment=tcod.CENTER,
             )
 
-        console = ConsoleContainer(new_console, 0, 0, 0, 0, 0, 0, 2, 'main')
+        console = ConsoleContainer(
+            new_console, (120-22)//2, 72//2, 0, 0, 0, 0, 1, 'main')
         console_handler.append(console)
 
     def ev_keydown(

@@ -75,7 +75,7 @@ class ConsoleHandler():
         sorted_consoles = sorted(
             visible_consoles, key=lambda x: x.z_index, reverse=False)
         for c in sorted_consoles:
-            c.console.blit(self.root_console, c.dest_x, c.dest_y,
-                           c.width, c.height, c.src_x, c.src_y)
+            c.console.blit(self.root_console, c.dest_x, c.dest_y, c.src_x, c.src_y,
+                           c.width, c.height, )
         # Clear them so we can start again
         self.consoles = []
