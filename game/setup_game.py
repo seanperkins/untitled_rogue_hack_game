@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import copy
+from game.console import ConsoleContainer, ConsoleHandler
+
+from tcod.console import Console
 from game.animation import AnimationHandler
 import lzma
 import pickle
@@ -87,7 +90,8 @@ class MainMenu(input_handlers.BaseEventHandler):
         super().__init__(animation_handler)
         self.animation_handler = animation_handler
         self.animation_handler.add_animation('rain',
-                                             self.rain(animation_handler.console.width, animation_handler.console.height))
+                                             self.rain(animation_handler.console_handler.root_console.width,
+                                                       animation_handler.console_handler.root_console.height))
 
     class rain():
         """Animate the menu."""
@@ -123,12 +127,13 @@ class MainMenu(input_handlers.BaseEventHandler):
     def print_animation(self):
         """Print the animation to the console."""
 
-    def on_render(self, console: tcod.Console) -> None:
+    def on_render(self, console_handler: ConsoleHandler) -> None:
         """Render the main menu on a background image."""
+        new_console = Console(120, 72, order='F')
 
-        console.print(
-            console.width // 2,
-            console.height // 2 - 4,
+        new_console.print(
+            new_console.width // 2,
+            new_console.height // 2 - 4,
             "Untitled Hacking Game",
             fg=color.menu_title,
             alignment=tcod.CENTER,
@@ -138,14 +143,17 @@ class MainMenu(input_handlers.BaseEventHandler):
         for i, text in enumerate(
             ["[N] Play a new game", "[C] Continue last game", "[Q] Quit"]
         ):
-            console.print(
-                console.width // 2,
-                console.height // 2 - 2 + i,
+            new_console.print(
+                new_console.width // 2,
+                new_console.height // 2 - 2 + i,
                 text.ljust(menu_width),
                 fg=color.menu_text,
                 bg=color.black,
                 alignment=tcod.CENTER,
             )
+
+        console = ConsoleContainer(new_console, 0, 0, 0, 0, 0, 0, 2, 'main')
+        console_handler.append(console)
 
     def ev_keydown(
         self, event: tcod.event.KeyDown

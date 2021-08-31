@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from tcod import console
+from game.console import ConsoleHandler
 from game.animation import AnimationHandler
 import traceback
 
@@ -37,7 +39,8 @@ def main() -> None:
         vsync=True,
     ) as context:
         root_console = tcod.Console(screen_width, screen_height, order="F")
-        animation_handler = AnimationHandler(console=root_console)
+        console_handler = ConsoleHandler(root_console)
+        animation_handler = AnimationHandler(console_handler)
         handler: input_handlers.BaseEventHandler = setup_game.MainMenu(
             animation_handler=animation_handler)
         try:
@@ -46,7 +49,8 @@ def main() -> None:
                 # The rendering order is wrong. I will need to create a renderering class
                 # that can handle z-indexing so consoles can be sorted then drawn.
                 animation_handler.draw_frame()
-                handler.on_render(console=root_console)
+                handler.on_render(console_handler)
+                console_handler.render()
                 context.present(root_console)
 
                 try:

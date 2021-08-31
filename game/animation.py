@@ -1,3 +1,4 @@
+from game.console import ConsoleContainer, ConsoleHandler
 import tcod
 import time
 
@@ -10,18 +11,20 @@ class AnimationHandler:
     AnimationHandler handles the animation of the game.
     """
 
-    def __init__(self, console: tcod.Console):
+    def __init__(self, console_handler: ConsoleHandler):
         """
         Initialize the AnimationHandler.
 
-        :param console: The root console to blit animation console to
+        :param console_handler: The class that handles rendering
         """
-        self.console = console
+        self.console_handler = console_handler
+
         self.animations = {}
 
         self.oldTime = 0
         self.oldFrame = None
 
+        # Using these two to be able to limit the number of times an individual frame rerenders
         self.frame_number = 1
         self.animation_frames = {}
 
@@ -55,7 +58,7 @@ class AnimationHandler:
         currentTime = time.time()
         if (currentTime - self.oldTime) > SECONDS_PER_FRAME:
             animation_console = tcod.Console(
-                self.console.width, self.console.height, order='F')
+                self.console_handler.root_console.width, self.console_handler.root_console.height, order='F')
             for name, animation in self.animations.items():
                 if animation.frame_ratio == None or (animation.frame_ratio and self.frame_number % animation.frame_ratio == 0):
                     self.animation_frames[name] = next(animation.generator)
@@ -66,11 +69,33 @@ class AnimationHandler:
                             self.animation_frames.pop(name)
             for name, frame in self.animation_frames.items():
                 (x_coords, y_coords, tiles) = frame
-                animation_console.tiles_rgb[x_coords[0]:x_coords[1], y_coords[0]:y_coords[1]] = tiles
-            animation_console.blit(self.console, 0, 0, 0, 0,
-                                   self.console.width, self.console.height)
+                animation_console.tiles_rgb[x_coords[0]
+                    :x_coords[1], y_coords[0]:y_coords[1]] = tiles
+            console_container = ConsoleContainer(
+                animation_console,
+                dest_x=0,
+                dest_y=0,
+                src_x=0,
+                src_y=0,
+                width=self.console_handler.root_console.width,
+                height=self.console_handler.root_console.height,
+                z_index=1,
+                screen='animation',
+            )
+
+            self.console_handler.append(console_container)
             self.oldTime = time.time()
             self.oldFrame = animation_console
         else:
-            self.oldFrame.blit(self.console, 0, 0, 0, 0,
-                               self.console.width, self.console.height)
+            console_container = ConsoleContainer(
+                self.oldFrame,
+                dest_x=0,
+                dest_y=0,
+                src_x=0,
+                src_y=0,
+                width=self.console_handler.root_console.width,
+                height=self.console_handler.root_console.height,
+                z_index=1,
+                screen='animation',
+            )
+            self.console_handler.append(console_container)
