@@ -1,4 +1,5 @@
 from __future__ import annotations
+from game.animation import AnimationHandler
 
 import os
 
@@ -52,6 +53,9 @@ MainGameEventHandler will become the active handler.
 
 
 class BaseEventHandler(tcod.event.EventDispatch[ActionOrHandler]):
+    def __init__(self, animationHandler: Optional(AnimationHandler)):
+        self.animationHandler = animationHandler
+
     def handle_events(self, event: tcod.event.Event) -> BaseEventHandler:
         """Handle an event and return the next active event handler."""
         state = self.dispatch(event)

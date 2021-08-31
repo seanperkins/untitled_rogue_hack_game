@@ -2,22 +2,26 @@
 from __future__ import annotations
 
 import copy
-from game.camera import Camera
+from game.animation import AnimationHandler
 import lzma
 import pickle
+import random
+import string
 import traceback
 from typing import Optional
+from utilities.set_interval import set_interval
 
+import numpy as np
 import tcod
 
 import game.color as color
-from game.engine import Engine
 import game.entity_factories as entity_factories
-from game.game_map import GameWorld
-import game.input_handlers as input_handlers
-
 import game.game_config as cfg
-
+import game.input_handlers as input_handlers
+from game.camera import Camera
+from game.engine import Engine
+from game.game_map import GameWorld
+from game.tile_types import graphic_dt
 
 # Load the background image and remove the alpha channel.
 background_image = tcod.image.load("data/menu_background.png")[:, :, :3]
@@ -79,9 +83,48 @@ def load_game(filename: str) -> Engine:
 class MainMenu(input_handlers.BaseEventHandler):
     """Handle the main menu rendering and input."""
 
+    def __init__(self, animation_handler: Optional[AnimationHandler]):
+        super().__init__(animation_handler)
+        self.animation_handler = animation_handler
+        self.animation_handler.add_animation('rain',
+                                             self.rain(animation_handler.console.width, animation_handler.console.height))
+
+    class rain():
+        """Animate the menu."""
+
+        def __init__(self, width, height):
+            self.generator = self.make_generator()
+            self.width = width
+            self.height = height
+            self.duration = None
+            self.frame_ratio = None
+
+        def make_generator(self):
+            items = [i for i in string.ascii_letters[:] +
+                     '`~!@#$%^&*()_-+={[}|\:;"<>.?/']
+            row = self.width
+            column = self.height
+            grid = np.full((row, column), fill_value=np.array(
+                (ord('-'), color.black, color.black), dtype=graphic_dt), order='F')
+            while True:
+                for i in range(row):
+                    for j in range(column):
+                        ri = random.randrange(len(items))
+                        randcolor = random.randint(0, 2)
+                        fg_color = color.dark_green
+                        if randcolor == 1:
+                            fg_color = color.light_green
+                        elif randcolor == 2:
+                            fg_color = color.green
+                        grid[i][j] = np.array(
+                            (ord(items[ri]), fg_color, color.black), dtype=graphic_dt)
+                yield ((0, row), (0, column), grid)
+
+    def print_animation(self):
+        """Print the animation to the console."""
+
     def on_render(self, console: tcod.Console) -> None:
         """Render the main menu on a background image."""
-        console.draw_semigraphics(background_image, 0, 0)
 
         console.print(
             console.width // 2,
@@ -102,7 +145,6 @@ class MainMenu(input_handlers.BaseEventHandler):
                 fg=color.menu_text,
                 bg=color.black,
                 alignment=tcod.CENTER,
-                bg_blend=tcod.BKGND_ALPHA(64),
             )
 
     def ev_keydown(
@@ -119,6 +161,7 @@ class MainMenu(input_handlers.BaseEventHandler):
                 traceback.print_exc()  # Print to stderr.
                 return input_handlers.PopupMessage(self, f"Failed to load save:\n{exc}")
         elif event.sym == tcod.event.K_n:
+            self.animation_handler.remove_animation('rain')
             return input_handlers.MainGameEventHandler(new_game())
 
         return None

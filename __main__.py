@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from game.animation import AnimationHandler
 import traceback
 
 import tcod
@@ -24,10 +25,9 @@ def main() -> None:
 
     tileset = tcod.tileset.load_tilesheet(*cfg.TILESET)
 
-    # handler: input_handlers.BaseEventHandler = setup_game.MainMenu()
     # Start new game, don't waste time with menu.
-    handler: input_handlers.BaseEventHandler = input_handlers.MainGameEventHandler(
-        setup_game.new_game())
+    # handler: input_handlers.BaseEventHandler = input_handlers.MainGameEventHandler(
+    #     setup_game.new_game())
 
     with tcod.context.new(
         columns=screen_width,
@@ -37,14 +37,20 @@ def main() -> None:
         vsync=True,
     ) as context:
         root_console = tcod.Console(screen_width, screen_height, order="F")
+        animation_handler = AnimationHandler(console=root_console)
+        handler: input_handlers.BaseEventHandler = setup_game.MainMenu(
+            animation_handler=animation_handler)
         try:
             while True:
                 root_console.clear()
+                # The rendering order is wrong. I will need to create a renderering class
+                # that can handle z-indexing so consoles can be sorted then drawn.
+                animation_handler.draw_frame()
                 handler.on_render(console=root_console)
                 context.present(root_console)
 
                 try:
-                    for event in tcod.event.wait():
+                    for event in tcod.event.get():
                         context.convert_event(event)
                         handler = handler.handle_events(event)
                 except Exception:  # Handle exceptions in game.
